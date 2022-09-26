@@ -9,13 +9,15 @@ class ProtectedResource:
     update (set).
     """
     def __init__(self):
-        self.val = -1
+        self._val = -1
 
-    def set(self, val):
-        self.val = val
+    @property
+    def val(self):
+        return self._val
 
-    def get(self):
-        return self.val
+    @val.setter
+    def val(self, val):
+        self._val = val
 
 
 def threaded_job(job_id, delay_sec, lock, lock_timeout, resource):
@@ -26,14 +28,14 @@ def threaded_job(job_id, delay_sec, lock, lock_timeout, resource):
             return
         try:
             log.info(f"[{job_id}] lock acquired")
-            log.info(f"[{job_id}] before set, resource: {resource.get()}")
-            resource.set(job_id)
-            log.info(f"[{job_id}] after set, resource: {resource.get()}")
+            log.info(f"[{job_id}] before set, resource: {resource.val}")
+            resource.val = job_id
+            log.info(f"[{job_id}] after set, resource: {resource.val}")
             log.info(f"[{job_id}] sleeping for {delay_sec}s")
             sleep(delay_sec)
         finally:
             log.info(f"[{job_id}] releasing lock")
-            log.info(f"[{job_id}] resource: {resource.get()}")
+            log.info(f"[{job_id}] resource: {resource.val}")
             lock.release()
 
     job_thread = Thread(
